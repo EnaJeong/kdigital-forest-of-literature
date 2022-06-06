@@ -26,7 +26,7 @@ national_code = CATEGORIES[NATION]
 file_name = f"{DIRECTORY}/book_code_{NATION}.csv"
 
 ##############################################################################
-CHROMEDRIVER = './resources/chromedriver.exe'
+CHROMEDRIVER = './resources/chromedriver_linux'
 
 
 def get_url(page=1):
