@@ -1,16 +1,35 @@
-import pandas as pd
-from bs4 import BeautifulSoup
-import requests
+import os
 import re
+from sre_parse import CATEGORIES
+
+from bs4 import BeautifulSoup
+import pandas as pd
+import requests
 
 
-NATIONAL_CODE = "017001045013"
-FILE_NAME = './crawling/book_code_spanish.csv'
+NATION = "spain"
+DIRECTORY = './analysis/data'
+
+CATEGORIES = {
+    "korea": "017001045006", 
+    "english": "017001045007",
+    "japan": "017001045008",
+    "china": "017001045023", 
+    "france": "017001045010", 
+    "germany": "017001045011", 
+    "russia": "017001045012", 
+    "spain": "017001045013", 
+    "europe": "017001045014",
+    "others": "017001045015", 
+}
+
+national_code = CATEGORIES[NATION]
+file_name = f"{DIRECTORY}/book_code_{NATION}.csv"
 
 
 ##############################################################################
 def get_url(page=1):
-    return f"http://www.yes24.com/24/Category/Display/{NATIONAL_CODE}?ParamSortTp=03&AO=2&PageNumber={page}"
+    return f"http://www.yes24.com/24/Category/Display/{national_code}?ParamSortTp=03&AO=2&PageNumber={page}"
 
 
 # CSS selector
@@ -50,9 +69,12 @@ for page in range(1, int(end_page) + 1):
         code = PAT_BOOK_CODE.findall(book.get(ATTR_BOOK_CODE))[0]
         titles[code] = book.text
 
-# 모은 책 code 정보 csv로 저장
+# 수집한 code와 title 정보 csv로 저장
 df_title = pd.DataFrame(titles.items(), columns=['code', 'title'])
 df_title.set_index('code', inplace=True)
-df_title.to_csv(FILE_NAME)
+
+if not os.path.exists(DIRECTORY):
+    os.mkdir(DIRECTORY)
+df_title.to_csv(file_name)
 
 print(df_title)
