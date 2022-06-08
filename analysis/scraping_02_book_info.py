@@ -9,10 +9,9 @@ import requests
 NATION = "spain"
 
 BOOK_CODE_FILE = f"./analysis/data/book_code_{NATION}.csv"
-BOOK_INFO_FILE = f"./analysis/data/book_{NATION}.csv"
+BOOK_INFO_FILE = f"./analysis/data/book_info_{NATION}.csv"
 
 
-##############################################################################
 def get_url(code):
     return f"http://www.yes24.com/Product/Goods/{code}"
 
@@ -29,8 +28,6 @@ ATTR_IMAGE_URL = "src"
 
 FIELDS = ("code", "title", "auth", "pub", "img", "info")
 Book = namedtuple("Book", FIELDS)
-
-##############################################################################
 
 df_book = pd.read_csv(BOOK_CODE_FILE, index_col=0)
 books: list[Book] = []
