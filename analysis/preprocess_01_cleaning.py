@@ -1,21 +1,37 @@
-import pandas as pd
 import re
 
-categories = ["China", "english", 'Europe', 'France', 'german', 'Japan',
-              'Korea_1', 'Korea_2', 'Korea_3', 'others', 'russian', 'spanish']
+import pandas as pd
 
-PAT_BLANK = re.compile(r'\s')
 
-for category in categories:
-    df = pd.read_csv(f'./crawling/book_info_{category}.csv', index_col=0)
+DIRECTORY = "./analysis/data"
+CATEGORIES = (
+    "china",
+    "english",
+    "europe",
+    "france",
+    "german",
+    "japan",
+    "korea_1",
+    "korea_2",
+    "korea_3",
+    "others",
+    "russia",
+    "spain",
+)
 
-    # info가 null인 항목 제거
-    df.dropna(axis=0, how='any', subset=["info"], inplace=True)
+PAT_BLANK = re.compile(r"\s")
+
+for category in CATEGORIES:
+    origin_file = f"{DIRECTORY}/book_info_{category}.csv"
+    result_file = f"{DIRECTORY}/cleaned_book_info_{category}.csv"
+
+    df = pd.read_csv(origin_file, index_col=0)
+    df.dropna(axis=0, how="any", subset=["info"], inplace=True)
 
     # 공백 제거
     for idx in df.index:
-        info = df.loc[idx]['info']
-        df.loc[idx]['info'] = PAT_BLANK.sub(' ', info)
+        info = df.loc[idx]["info"]
+        df.loc[idx]["info"] = PAT_BLANK.sub(" ", info)
 
-    df.to_csv(f'./crawling/cleaned_book_info_{category}.csv')
-    print(df.info(), '\n')
+    df.to_csv(result_file)
+    print(df.info(), "\n")
