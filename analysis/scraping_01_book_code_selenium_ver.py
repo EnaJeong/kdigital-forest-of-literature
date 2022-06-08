@@ -7,19 +7,19 @@ from selenium.webdriver.common.by import By
 
 
 NATION = "spain"
-DIRECTORY = './analysis/data'
+DIRECTORY = "./analysis/data"
 
 CATEGORIES = {
-    "korea": "017001045006", 
+    "korea": "017001045006",
     "english": "017001045007",
     "japan": "017001045008",
-    "china": "017001045023", 
-    "france": "017001045010", 
-    "germany": "017001045011", 
-    "russia": "017001045012", 
-    "spain": "017001045013", 
+    "china": "017001045023",
+    "france": "017001045010",
+    "germany": "017001045011",
+    "russia": "017001045012",
+    "spain": "017001045013",
     "europe": "017001045014",
-    "others": "017001045015", 
+    "others": "017001045015",
 }
 
 national_code = CATEGORIES[NATION]
@@ -34,15 +34,15 @@ def get_url(page=1):
 
 
 # CSS selector
-CSS_BOOK_TITLE = '#category_layout .goods_name > a:first-of-type'
-CSS_END_BUTTON = '.bgYUI.end'
+CSS_BOOK_TITLE = "#category_layout .goods_name > a:first-of-type"
+CSS_END_BUTTON = ".bgYUI.end"
 
 # Attributes & RE patterns
-ATTR_BOOK_CODE = 'href'
-PAT_BOOK_CODE = re.compile(r'Goods/(.+)$')
+ATTR_BOOK_CODE = "href"
+PAT_BOOK_CODE = re.compile(r"Goods/(.+)$")
 
-ATTR_END_PAGE = 'href'
-PAT_END_PAGE = r'(?<=PageNumber=).+$'
+ATTR_END_PAGE = "href"
+PAT_END_PAGE = r"(?<=PageNumber=).+$"
 
 # 체험판 제외
 REMOVAL_TYPE = "체험판"
@@ -50,9 +50,9 @@ REMOVAL_TYPE = "체험판"
 
 # Chromedriver 설정
 options = webdriver.ChromeOptions()
-options.add_argument('headless')
-options.add_argument('disable-gpu')
-options.add_argument('lang=ko_KR')
+options.add_argument("headless")
+options.add_argument("disable-gpu")
+options.add_argument("lang=ko_KR")
 driver = webdriver.Chrome(CHROMEDRIVER, options=options)
 
 # 목록 첫 페이지로 이동
@@ -86,8 +86,8 @@ try:
             titles[code] = book.text
 
     # 수집한 code와 title 정보 csv로 저장
-    df_title = pd.DataFrame(titles.items(), columns=['code', 'title'])
-    df_title.set_index('code', inplace=True)
+    df_title = pd.DataFrame(titles.items(), columns=["code", "title"])
+    df_title.set_index("code", inplace=True)
 
     if not os.path.exists(DIRECTORY):
         os.mkdir(DIRECTORY)
