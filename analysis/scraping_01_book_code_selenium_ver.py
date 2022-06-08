@@ -6,7 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 
 
-NATION = "spain"
+CATEGORY = "spain"
 DIRECTORY = "./analysis/data"
 
 CATEGORIES = {
@@ -22,15 +22,19 @@ CATEGORIES = {
     "others": "017001045015",
 }
 
-national_code = CATEGORIES[NATION]
-file_name = f"{DIRECTORY}/book_code_{NATION}.csv"
+CHROMEDRIVER = "./resources/chromedriver_linux"
+# CHROMEDRIVER = "./resources/chromedriver_win.exe"
 
-##############################################################################
-CHROMEDRIVER = "./resources/chromedriver_win.exe"  # "./resources/chromedriver_linux"
+
+def save_file(df: pd.DataFrame):
+    if not os.path.exists(DIRECTORY):
+        os.mkdir(DIRECTORY)
+    file_name = f"{DIRECTORY}/book_code_{CATEGORY}.csv"
+    df.to_csv(file_name)
 
 
 def get_url(page=1):
-    return f"http://www.yes24.com/24/Category/Display/{national_code}?ParamSortTp=03&AO=2&PageNumber={page}"
+    return f"http://www.yes24.com/24/Category/Display/{CATEGORIES[CATEGORY]}?ParamSortTp=03&AO=2&PageNumber={page}"
 
 
 # CSS selector
@@ -46,7 +50,7 @@ PAT_END_PAGE = r"(?<=PageNumber=).+$"
 
 # 체험판 제외
 REMOVAL_TYPE = "체험판"
-##############################################################################
+
 
 # Chromedriver 설정
 options = webdriver.ChromeOptions()
@@ -88,10 +92,7 @@ try:
     # 수집한 code와 title 정보 csv로 저장
     df_title = pd.DataFrame(titles.items(), columns=["code", "title"])
     df_title.set_index("code", inplace=True)
-
-    if not os.path.exists(DIRECTORY):
-        os.mkdir(DIRECTORY)
-    df_title.to_csv(file_name)
+    save_file(df_title)
 
     print(df_title)
 
