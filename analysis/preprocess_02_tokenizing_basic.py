@@ -1,44 +1,55 @@
-import pandas as pd
-import numpy as np
-from konlpy.tag import Komoran
 import re
 
-CATEGORY = 'Japan'
+from konlpy.tag import Komoran
+import pandas as pd
 
-TAG_NORMAL = {'NA', 'NF', 'NNG', 'NNP', 'XR'}
 
-CSV_ORIGIN = f"./crawling/cleaned_book_info_{CATEGORY}.csv"
-CSV_RESULT = f"./datasets/book_token_{CATEGORY}.csv"
+DIRECTORY = "./analysis/data"
+CATEGORIES = (
+    "china",
+    "english",
+    "europe",
+    "france",
+    "german",
+    "japan",
+    "korea_1",
+    "korea_2",
+    "korea_3",
+    "others",
+    "russia",
+    "spain",
+)
 
-df = pd.read_csv(CSV_ORIGIN, index_col=0)
+TAG_NORMAL = {"NA", "NF", "NNG", "NNP", "XR"}
 
 komoran = Komoran()
 
-cleaned_sentences = []
-codes = []
+for category in CATEGORIES:
+    origin_file = f"{DIRECTORY}/cleaned_book_info_{category}.csv"
+    result_file = f"{DIRECTORY}/book_token_{category}.csv"
 
-for idx in df.index:
-    text = df.loc[idx]['info']
+    df = pd.read_csv(origin_file, index_col=0)
 
-    # 숫자,한글 제외 문자 제거
-    text = re.sub('[^가-힣0-9]', ' ', str(text))
+    codes = []
+    for idx in df.index:
+        text = df.loc[idx, "info"]
 
-    # 문자가 없는 경우 token화 생략
-    text = re.sub(r'^\s*$', ' ', text)
-    if text == ' ':
-        continue
+        # 숫자,한글 제외 문자 제거
+        text = re.sub("[^가-힣0-9]", " ", str(text))
 
-    token = komoran.pos(text) # 품사 별로 token 화
-    df_token = pd.DataFrame(token, columns=['word', 'tag'])
+        # 문자가 없는 경우 token화 생략
+        text = re.sub(r"^\s*$", " ", text)
+        if text == " ":
+            continue
 
-    df_cleaned_token = df_token[df_token['tag'].isin(TAG_NORMAL)]['word'] # TAG_NORMAL 에 있는 품사만 뽑아내는 작업
-    cleaned_sentence = ' '.join(df_cleaned_token) # 단어들 이어붙이기
+        # 품사 별로 token 화하여 TAG_NORMAL 품사들만 추출
+        token = komoran.pos(text)
+        df_token = pd.DataFrame(token, columns=["word", "tag"])
+        df_cleaned_token = df_token[df_token["tag"].isin(TAG_NORMAL)]["word"]
 
-    cleaned_sentences.append(cleaned_sentence)
-    codes.append(idx)
+        df.loc[idx, "info"] = " ".join(df_cleaned_token)
+        codes.append(idx)
 
-df_result = df[df.index.isin(codes)].copy()
-df_result['info'] = cleaned_sentences
-
-df_result.to_csv(CSV_RESULT)
-
+    df_result = df[df.index.isin(codes)]
+    df_result.to_csv(result_file)
+    print(df_result.head())
