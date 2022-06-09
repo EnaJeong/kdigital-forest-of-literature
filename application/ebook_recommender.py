@@ -7,12 +7,18 @@ import re
 import pickle
 from sklearn.metrics.pairwise import linear_kernel
 from scipy.io import mmread
-from PyQt5.QtWidgets import QApplication, QWidget, QAbstractItemView, QCompleter, QTableWidgetItem
+from PyQt5.QtWidgets import (
+    QApplication,
+    QWidget,
+    QAbstractItemView,
+    QCompleter,
+    QTableWidgetItem,
+)
 from PyQt5.QtCore import QStringListModel, Qt
 from PyQt5.QtGui import QPixmap
 from PyQt5 import uic
 
-form_window = uic.loadUiType('./book_application.ui')[0]
+form_window = uic.loadUiType("./book_application.ui")[0]
 
 
 class Recommender(QWidget, form_window):
@@ -73,34 +79,78 @@ class Recommender(QWidget, form_window):
         self.setWindowTitle("문학의 숲")
 
         # 데이터
-        self.df_book = pd.read_csv('../datasets/book_info.csv', index_col=0)
+        self.df_book = pd.read_csv("../datasets/book_info.csv", index_col=0)
 
-        with open('../datasets/tfidf.pickle', 'rb') as f:
+        with open("../datasets/tfidf.pickle", "rb") as f:
             self.Tfidf = pickle.load(f)
-        self.Tfidf_matrix = mmread('../datasets/tfidf.mtx').tocsr()
+        self.Tfidf_matrix = mmread("../datasets/tfidf.mtx").tocsr()
 
         # 이미지 처리 정보
         self.pixmap = QPixmap()
-        self.img_main_height = self.lbl_first_image.height()    # 메인 화면의 weekly best 책 표지 사이즈
-        self.img_keyword_height = self.lbl_image_1.height()     # keyword 이용한 추천 목록 책 표지 사이즈
-        self.img_height = self.lbl_book_image.height()          # 책 검색 화면의 검색 목록에서 선택한 책 표지 사이즈
-        self.img_name_height = self.lbl_image_9.height()        # 지정한 책과 유사한 추천 목록  책 표지 사이즈
+        self.img_main_height = (
+            self.lbl_first_image.height()
+        )  # 메인 화면의 weekly best 책 표지 사이즈
+        self.img_keyword_height = (
+            self.lbl_image_1.height()
+        )  # keyword 이용한 추천 목록 책 표지 사이즈
+        self.img_height = self.lbl_book_image.height()  # 책 검색 화면의 검색 목록에서 선택한 책 표지 사이즈
+        self.img_name_height = self.lbl_image_9.height()  # 지정한 책과 유사한 추천 목록  책 표지 사이즈
 
         # 메인화면 책 이미지와 제목
-        self.main_covers = [self.lbl_first_image, self.lbl_second_image, self.lbl_third_image]
-        self.main_titles = [self.lbl_first_title, self.lbl_second_title, self.lbl_third_title]
+        self.main_covers = [
+            self.lbl_first_image,
+            self.lbl_second_image,
+            self.lbl_third_image,
+        ]
+        self.main_titles = [
+            self.lbl_first_title,
+            self.lbl_second_title,
+            self.lbl_third_title,
+        ]
 
         # 키워드 추천 목록 이미지와 제목
-        self.keyword_covers = [self.lbl_image_1, self.lbl_image_2, self.lbl_image_3, self.lbl_image_4,
-                               self.lbl_image_5, self.lbl_image_6, self.lbl_image_7, self.lbl_image_8]
-        self.keyword_titles = [self.lbl_title_1, self.lbl_title_2, self.lbl_title_3, self.lbl_title_4,
-                               self.lbl_title_5, self.lbl_title_6, self.lbl_title_7, self.lbl_title_8]
+        self.keyword_covers = [
+            self.lbl_image_1,
+            self.lbl_image_2,
+            self.lbl_image_3,
+            self.lbl_image_4,
+            self.lbl_image_5,
+            self.lbl_image_6,
+            self.lbl_image_7,
+            self.lbl_image_8,
+        ]
+        self.keyword_titles = [
+            self.lbl_title_1,
+            self.lbl_title_2,
+            self.lbl_title_3,
+            self.lbl_title_4,
+            self.lbl_title_5,
+            self.lbl_title_6,
+            self.lbl_title_7,
+            self.lbl_title_8,
+        ]
 
         # 유사한 책 추천 목록 이미지와 제목
-        self.name_covers = [self.lbl_image_9, self.lbl_image_10, self.lbl_image_11, self.lbl_image_12,
-                            self.lbl_image_13, self.lbl_image_14, self.lbl_image_15, self.lbl_image_16]
-        self.name_titles = [self.lbl_title_9, self.lbl_title_10, self.lbl_title_11, self.lbl_title_12,
-                            self.lbl_title_13, self.lbl_title_14, self.lbl_title_15, self.lbl_title_16]
+        self.name_covers = [
+            self.lbl_image_9,
+            self.lbl_image_10,
+            self.lbl_image_11,
+            self.lbl_image_12,
+            self.lbl_image_13,
+            self.lbl_image_14,
+            self.lbl_image_15,
+            self.lbl_image_16,
+        ]
+        self.name_titles = [
+            self.lbl_title_9,
+            self.lbl_title_10,
+            self.lbl_title_11,
+            self.lbl_title_12,
+            self.lbl_title_13,
+            self.lbl_title_14,
+            self.lbl_title_15,
+            self.lbl_title_16,
+        ]
 
         # 라벨에 있는 하이퍼링크 이용해서 웹 페이지 열도록 설정
         for title in self.main_titles:
@@ -123,21 +173,23 @@ class Recommender(QWidget, form_window):
 
     def generate_page_1(self):
         # 주간 베스트 3위 책 읽어오기
-        url_weekly = "http://www.yes24.com/24/Category/More/017001045?ElemNo=94&ElemSeq=1&AO=2"
+        url_weekly = (
+            "http://www.yes24.com/24/Category/More/017001045?ElemNo=94&ElemSeq=1&AO=2"
+        )
 
         # 책 이미지, 제목 정보
-        css_book = '#category_layout .goods_img img'
-        attr_image = 'src'
-        attr_title = 'alt'
+        css_book = "#category_layout .goods_img img"
+        attr_image = "src"
+        attr_title = "alt"
 
         # 책 코드 정보
-        css_code = '#category_layout .goods_name > a:nth-of-type(1)'
+        css_code = "#category_layout .goods_name > a:nth-of-type(1)"
         # css_code = '#category_layout .goods_name > a:first-of-type' # 나는 되는데 신궁님은 error 발생... 원인 불명
-        attr_code = 'href'
-        pat_code = re.compile(r'Goods/(.+)$')
+        attr_code = "href"
+        pat_code = re.compile(r"Goods/(.+)$")
 
         # weekly best 접속
-        soup = BeautifulSoup(requests.get(url_weekly).text, 'lxml')
+        soup = BeautifulSoup(requests.get(url_weekly).text, "lxml")
         books = soup.select(css_book)
         codes = soup.select(css_code)
 
@@ -150,7 +202,9 @@ class Recommender(QWidget, form_window):
             self.pixmap.loadFromData(cover)
 
             # 책 이미지와 제목 설정
-            self.main_covers[i].setPixmap(self.pixmap.scaledToHeight(self.main_covers[i].height()))
+            self.main_covers[i].setPixmap(
+                self.pixmap.scaledToHeight(self.main_covers[i].height())
+            )
             self.main_titles[i].setText(self.gen_title(code, book.get(attr_title)))
 
         # 시그널 슬롯 연결
@@ -170,26 +224,33 @@ class Recommender(QWidget, form_window):
     def generate_page_3(self):
         # line edit에 자동완성 기능 추가
         model = QStringListModel()
-        model.setStringList(self.df_book['title'].unique())
+        model.setStringList(self.df_book["title"].unique())
         completer = QCompleter()
         completer.setModel(model)
-        completer.popup().setStyleSheet(Recommender.__scroll_bar_stylesheet)    # scroll bar style 적용
+        completer.popup().setStyleSheet(
+            Recommender.__scroll_bar_stylesheet
+        )  # scroll bar style 적용
         self.le_bookname_find.setCompleter(completer)
 
         # 책 목록 검색 결과창
         # column 설정
         tbl_book_columns = ["제목", "저자", "출판사"]
-        self.tbl_book.setColumnCount(len(tbl_book_columns))         # column 개수 설정
-        self.tbl_book.setHorizontalHeaderLabels(tbl_book_columns)   # column 값 설정
+        self.tbl_book.setColumnCount(len(tbl_book_columns))  # column 개수 설정
+        self.tbl_book.setHorizontalHeaderLabels(tbl_book_columns)  # column 값 설정
 
         # scroll bar style 적용
-        self.tbl_book.setStyleSheet("QTableWidget {border: 1px solid #dddddd; gridline-color: #dddddd}" + Recommender.__scroll_bar_stylesheet)
+        self.tbl_book.setStyleSheet(
+            "QTableWidget {border: 1px solid #dddddd; gridline-color: #dddddd}"
+            + Recommender.__scroll_bar_stylesheet
+        )
 
         # 책 목록 기본 설정
-        self.tbl_book.verticalHeader().setVisible(False)                    # row 번호 안 보이게
-        self.tbl_book.setEditTriggers(QAbstractItemView.NoEditTriggers)     # 책 목록 테이블 수정 금지
-        self.tbl_book.horizontalHeader().setStretchLastSection(True)        # header 넓이 꽉차게 설정
-        self.tbl_book.setSelectionBehavior(QAbstractItemView.SelectRows)    # 열 전체 선택하게 설정
+        self.tbl_book.verticalHeader().setVisible(False)  # row 번호 안 보이게
+        self.tbl_book.setEditTriggers(
+            QAbstractItemView.NoEditTriggers
+        )  # 책 목록 테이블 수정 금지
+        self.tbl_book.horizontalHeader().setStretchLastSection(True)  # header 넓이 꽉차게 설정
+        self.tbl_book.setSelectionBehavior(QAbstractItemView.SelectRows)  # 열 전체 선택하게 설정
 
         # 시그널 슬롯 연결
         # 검색창에서 입력 후 엔터 누르거나 검색 버튼 누르면 책 추천하도록 slot 연결
@@ -217,7 +278,7 @@ class Recommender(QWidget, form_window):
             self.keyword_covers[i].setVisible(False)
 
         # 입력받은 문구를 공백 기준으로 분할
-        keywords = self.le_keyword_find.text().split(' ')
+        keywords = self.le_keyword_find.text().split(" ")
         sentence = keywords * 10
 
         # 입력 받은 키워드들과 다른 책들과의 cosine 유사도 계산
@@ -228,14 +289,16 @@ class Recommender(QWidget, form_window):
 
         # 추천한 책 목록 설정
         for i, code in enumerate(rec_books.index):
-            title, img = rec_books.loc[code]['title'], rec_books.loc[code]['img']
+            title, img = rec_books.loc[code]["title"], rec_books.loc[code]["img"]
 
             # pixmap 이용해서 웹 상의 책 표지 이미지 다운
             cover = urllib.request.urlopen(img).read()
             self.pixmap.loadFromData(cover)
 
             # 책 이미지와 제목 설정
-            self.keyword_covers[i].setPixmap(self.pixmap.scaledToHeight(self.img_keyword_height))
+            self.keyword_covers[i].setPixmap(
+                self.pixmap.scaledToHeight(self.img_keyword_height)
+            )
             self.keyword_titles[i].setText(self.gen_title(code, title))
 
         # 책 이미지와 제목 노출하도록 설정 (위에서 안 보이게 처리했던 거 다시 푸는 작업)
@@ -247,31 +310,31 @@ class Recommender(QWidget, form_window):
         # 기존에 테이블에 남아있는 정보 초기화
         self.tbl_book.clearContents()
         self.tbl_book.setRowCount(0)
-        
+
         # 입력한 문구가 포함되어 있는 책 목록 검색
         keyword = self.le_bookname_find.text()
-        books = self.df_book[self.df_book['title'].str.match(f'.*{keyword}.*')]
-        
-        # 책 목록 표에 검색 결과 노출
-        self.tbl_book.setRowCount(len(books.index))     # row 개수 설정
+        books = self.df_book[self.df_book["title"].str.match(f".*{keyword}.*")]
 
-        for i, code in enumerate(books.index):                      # 검색한 결과의 index (책 코드) 별
-            for j, col in enumerate(['title', 'auth', 'pub']):      # column 제목, 저자, 출판사 별
-                item_title = QTableWidgetItem(books.loc[code][col])     # 책 목록 표의 하나의 셀 생성
-                item_title.setData(Qt.UserRole, code)                   # 선택한 셀 식별용 책 code 저장
-                self.tbl_book.setItem(i, j, item_title)                 # 표에 해당 셀 추가
+        # 책 목록 표에 검색 결과 노출
+        self.tbl_book.setRowCount(len(books.index))  # row 개수 설정
+
+        for i, code in enumerate(books.index):  # 검색한 결과의 index (책 코드) 별
+            for j, col in enumerate(["title", "auth", "pub"]):  # column 제목, 저자, 출판사 별
+                item_title = QTableWidgetItem(books.loc[code][col])  # 책 목록 표의 하나의 셀 생성
+                item_title.setData(Qt.UserRole, code)  # 선택한 셀 식별용 책 code 저장
+                self.tbl_book.setItem(i, j, item_title)  # 표에 해당 셀 추가
 
     def tbl_book_cell_clicked_slot(self):
         # 현재 선택한 cell에 미리 저장해 놓은 책 코드 읽어오기
         code = self.tbl_book.currentItem().data(Qt.UserRole)
-        
+
         # 지정한 책 식별
         book = self.df_book.loc[code]
 
         # pixmap 이용해서 웹 상의 책 표지 이미지 다운
-        cover = urllib.request.urlopen(book['img']).read()
+        cover = urllib.request.urlopen(book["img"]).read()
         self.pixmap.loadFromData(cover)
-        
+
         # 책 표지 노출, 추천 버튼 노출
         self.lbl_book_image.setPixmap(self.pixmap.scaledToHeight(self.img_height))
         self.lbl_book_image.setVisible(True)
@@ -292,14 +355,16 @@ class Recommender(QWidget, form_window):
 
         # 추천한 책 목록 설정
         for i, code in enumerate(rec_books.index):
-            title, img = rec_books.loc[code]['title'], rec_books.loc[code]['img']
+            title, img = rec_books.loc[code]["title"], rec_books.loc[code]["img"]
 
             # pixmap 이용해서 웹 상의 책 표지 이미지 다운
             cover = urllib.request.urlopen(img).read()
             self.pixmap.loadFromData(cover)
 
             # 책 이미지와 제목 설정
-            self.name_covers[i].setPixmap(self.pixmap.scaledToHeight(self.img_name_height))
+            self.name_covers[i].setPixmap(
+                self.pixmap.scaledToHeight(self.img_name_height)
+            )
             self.name_titles[i].setText(self.gen_title(code, title))
 
         # 추천 책 목록 화면으로 전환
@@ -313,22 +378,24 @@ class Recommender(QWidget, form_window):
         self.stackedWidget.setCurrentIndex(1)
 
         # 검색 결과 초기화
-        self.le_keyword_find.clear()           # 검색창에 남은 문자 제거
-        for i, title in enumerate(self.keyword_titles):     # 검색했던 책, 이미지들 모두 안 보이게 설정
+        self.le_keyword_find.clear()  # 검색창에 남은 문자 제거
+        for i, title in enumerate(self.keyword_titles):  # 검색했던 책, 이미지들 모두 안 보이게 설정
             title.setVisible(False)
             self.keyword_covers[i].setVisible(False)
 
     def move_to_name(self):
         self.stackedWidget.setCurrentIndex(2)
-        self.stackedWidget_2.setCurrentIndex(0)     # 책 검색하는 페이지로 설정
+        self.stackedWidget_2.setCurrentIndex(0)  # 책 검색하는 페이지로 설정
 
         # 검색 결과 초기화
-        self.le_bookname_find.clear()           # 검색창에 남은 문자 제거
-        self.tbl_book.clearContents()           # 기존에 검색했던 책 목록 삭제
-        self.tbl_book.setRowCount(0)            # 비어있는 열 삭제
-        self.tbl_book.horizontalHeader().setStretchLastSection(True)    # header 조절한 부분 원상복귀
-        self.lbl_book_image.setVisible(False)   # 이미지 안 보이게
-        self.btn_similar.setVisible(False)      # 유사한 책 추천 버튼 안 보이게
+        self.le_bookname_find.clear()  # 검색창에 남은 문자 제거
+        self.tbl_book.clearContents()  # 기존에 검색했던 책 목록 삭제
+        self.tbl_book.setRowCount(0)  # 비어있는 열 삭제
+        self.tbl_book.horizontalHeader().setStretchLastSection(
+            True
+        )  # header 조절한 부분 원상복귀
+        self.lbl_book_image.setVisible(False)  # 이미지 안 보이게
+        self.btn_similar.setVisible(False)  # 유사한 책 추천 버튼 안 보이게
 
     # 유사한 책 목록 생성
     def gen_recommendation(self, cosine_sim, book_code=None):
@@ -343,7 +410,7 @@ class Recommender(QWidget, form_window):
         else:
             rec_codes = rec_codes[:-1]
 
-        return self.df_book.loc[rec_codes][['title', 'img']]
+        return self.df_book.loc[rec_codes][["title", "img"]]
 
     # hyperlink 설정된 책 제목 생성 (라벨용)
     # 객체마다 다르게 동작하는 것이 아니라서 staticmethod로 설정했는데 무시하셔도 괜찮습니다.
