@@ -4,6 +4,9 @@ import pandas as pd
 
 
 DIRECTORY = "./analysis/data"
+TARGET_FILE = "book_token"
+# TARGET_FILE = "book_refined_token"
+
 CATEGORIES = (
     "china",
     "english",
@@ -20,13 +23,13 @@ CATEGORIES = (
 )
 
 RESULT_DIRECTORY = "./analysis/datasets"
-RESULT_FILE = f"{RESULT_DIRECTORY}/book_token.csv"
+RESULT_FILE = f"{RESULT_DIRECTORY}/{TARGET_FILE}.csv"
 
 
 dfs = []
 
 for category in CATEGORIES:
-    df = pd.read_csv(f"{DIRECTORY}/book_token_{category}.csv", index_col=0)
+    df = pd.read_csv(f"{DIRECTORY}/{TARGET_FILE}_{category}.csv", index_col=0)
     print(df.head())
     dfs.append(df)
 
