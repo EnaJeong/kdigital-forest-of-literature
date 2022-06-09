@@ -1,6 +1,5 @@
 import os
 import re
-from sre_parse import CATEGORIES
 
 from bs4 import BeautifulSoup
 import pandas as pd
