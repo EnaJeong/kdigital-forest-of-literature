@@ -22,6 +22,9 @@ CATEGORIES = (
 
 TAG_NORMAL = {"NA", "NF", "NNG", "NNP", "XR"}
 
+PAT_NO_KOREAN = re.compile(r"[^가-힣]*$")
+
+
 komoran = Komoran()
 
 for category in CATEGORIES:
@@ -45,9 +48,10 @@ for category in CATEGORIES:
         # 품사 별로 token 화하여 TAG_NORMAL 품사들만 추출
         token = komoran.pos(text)
         df_token = pd.DataFrame(token, columns=["word", "tag"])
-        df_cleaned_token = df_token[df_token["tag"].isin(TAG_NORMAL)]["word"]
+        cleaned_tokens = df_token[df_token["tag"].isin(TAG_NORMAL)]["word"]
+        cleaned_tokens = cleaned_tokens[~cleaned_tokens.str.match(PAT_NO_KOREAN)]
 
-        df.loc[idx, "info"] = " ".join(df_cleaned_token)
+        df.loc[idx, "info"] = " ".join(cleaned_tokens)
         codes.append(idx)
 
     df_result = df[df.index.isin(codes)]
