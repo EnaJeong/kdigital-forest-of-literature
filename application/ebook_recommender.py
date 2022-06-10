@@ -79,11 +79,11 @@ class Recommender(QWidget, form_window):
         self.setWindowTitle("문학의 숲")
 
         # 데이터
-        self.df_book = pd.read_csv("../datasets/book_info.csv", index_col=0)
+        self.df_book = pd.read_csv("./datasets/book_info.csv", index_col=0)
 
-        with open("../datasets/tfidf.pickle", "rb") as f:
+        with open("./datasets/tfidf.pickle", "rb") as f:
             self.Tfidf = pickle.load(f)
-        self.Tfidf_matrix = mmread("../datasets/tfidf.mtx").tocsr()
+        self.Tfidf_matrix = mmread("./datasets/tfidf.mtx").tocsr()
 
         # 이미지 처리 정보
         self.pixmap = QPixmap()
