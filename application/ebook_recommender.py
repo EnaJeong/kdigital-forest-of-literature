@@ -9,8 +9,13 @@ from bs4 import BeautifulSoup
 from PyQt5 import uic
 from PyQt5.QtCore import QStringListModel, Qt
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import (QAbstractItemView, QApplication, QCompleter,
-                             QTableWidgetItem, QWidget)
+from PyQt5.QtWidgets import (
+    QAbstractItemView,
+    QApplication,
+    QCompleter,
+    QTableWidgetItem,
+    QWidget,
+)
 from scipy.io import mmread
 from sklearn.metrics.pairwise import linear_kernel
 
