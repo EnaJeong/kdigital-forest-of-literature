@@ -1,22 +1,19 @@
-import sys
-import pandas as pd
-import urllib.request
-from bs4 import BeautifulSoup
-import requests
-import re
 import pickle
-from sklearn.metrics.pairwise import linear_kernel
-from scipy.io import mmread
-from PyQt5.QtWidgets import (
-    QApplication,
-    QWidget,
-    QAbstractItemView,
-    QCompleter,
-    QTableWidgetItem,
-)
+import re
+import sys
+import urllib.request
+
+import pandas as pd
+import requests
+from bs4 import BeautifulSoup
+from PyQt5 import uic
 from PyQt5.QtCore import QStringListModel, Qt
 from PyQt5.QtGui import QPixmap
-from PyQt5 import uic
+from PyQt5.QtWidgets import (QAbstractItemView, QApplication, QCompleter,
+                             QTableWidgetItem, QWidget)
+from scipy.io import mmread
+from sklearn.metrics.pairwise import linear_kernel
+
 
 form_window = uic.loadUiType("./book_application.ui")[0]
 
